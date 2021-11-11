@@ -187,14 +187,11 @@ func checkRegisterDID(evm *EVM, p *did.DIDPayload, gas uint64) error {
 		return errors.New("checkDIDTransaction [VM]  Check Sig FALSE")
 	}
 	doc := p.DIDDoc
-	// if err = checkVerifiableCredentials(evm, doc.ID, doc.VerifiableCredential,
-	// 	doc.Authentication, doc.PublicKey, nil, true); err != nil {
-	// 	if err.Error() == "[VM] Check Sig FALSE" && evm.Context.BlockNumber.Cmp(configHeight) < 0{
-	// 		log.Warn("checkRegisterDID end "," Check Sig FALSE ID", p.DIDDoc.ID)
-	// 		return nil
-	// 	}
-	// 	return err
-	// }
+
+	//if err = checkVerifiableCredentials(evm, doc.ID, doc.VerifiableCredential,
+	//	doc.Authentication, doc.PublicKey, doc.Controller); err != nil {
+	//	return err
+	//}
 
 	if configHeight == nil || evm.Context.BlockNumber.Cmp(configHeight) > 0 || senderAddr != configAddr {
 		DIDProofArray, err := getDocProof(p.DIDDoc.Proof)
@@ -706,7 +703,6 @@ func Unmarshal(src, target interface{}) error {
 func checkVerifiableCredentials(evm *EVM, ID string, VerifiableCredential []did.VerifiableCredential,
 	Authentication []interface{}, PublicKey []did.DIDPublicKeyInfo, controller interface{}) error {
 	var issuerPublicKey, issuerCode, signature []byte
-	//var err error
 
 	//1，Traverse each credential, if Issuer is an empty string, use the DID in CredentialSubject,
 	//if it is still an empty string, use the outermost DID, indicating that it is a self-declared Credential
@@ -725,11 +721,19 @@ func checkVerifiableCredentials(evm *EVM, ID string, VerifiableCredential []did.
 				realIssuer = ID
 			}
 		}
-
-		isDID, err := evm.StateDB.IsDID(realIssuer)
-		if err != nil {
-			return err
+		//
+		var isDID bool
+		var err error
+		//self Issuer
+		if  realIssuer == ID {
+			isDID = did.IsDID(ID, PublicKey)
+		}else{
+			isDID, err = evm.StateDB.IsDID(realIssuer)
+			if err != nil {
+				return err
+			}
 		}
+
 		if isDID {
 			//realIssuer is self and Issuer is not ""
 			if realIssuer == ID {
@@ -781,7 +785,7 @@ func checkVerifiableCredentials(evm *EVM, ID string, VerifiableCredential []did.
 			return err
 		}
 		if !success {
-			return errors.New("[VM] Check Sig FALSE")
+			return errors.New("checkVerifiableCredentials Check Sig FALSE")
 		}
 	}
 	return nil
