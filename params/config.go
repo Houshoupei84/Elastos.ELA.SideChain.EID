@@ -427,6 +427,8 @@ type ChainConfig struct {
 	OldDIDMigrateAddr     string `json:"oldDIDMigrateAddr,omitempty"`
 	OldDIDMigrateHeight   *big.Int `json:"oldDIDMigrateHeight,omitempty"`
 	DocArraySortHeight	  *big.Int `json:"docArraySortHeight,omitempty"`
+	CustomDIDHeight	  *big.Int `json:"customDIDHeight,omitempty"`
+
 	DynamicArbiterHeight  uint64 `json:"dynamicArbiterHeight,omitempty"`
 }
 
