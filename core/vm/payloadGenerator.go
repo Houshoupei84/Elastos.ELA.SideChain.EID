@@ -52,7 +52,7 @@ func (s *PayloadGenerator) TestFromHexStrPublicToBase58PublicJianBin(publickeyhe
 
 
 
-//create
+//create did
 func (s *PayloadGenerator)getPayloadDIDInfoChangeDoc(id string, didDIDPayload string, docBytes []byte, privateKey1Str, publicKey1Str,
 	privateKey2Str, publicKey2Str, VMKey string, privateKeyVerCreStr, publicKeyVerCrStr []string) *did.DIDPayload {
 	//pBytes := getDIDPayloadBytes(id)

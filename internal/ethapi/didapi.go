@@ -282,9 +282,18 @@ func (s *PublicTransactionPoolAPI) ResolveCredential(ctx context.Context, param 
 
 func (s *PublicTransactionPoolAPI) ListCredentials(ctx context.Context, param map[string]interface{}) (interface{}, error) {
 	idParam, ok := param["did"].(string)
+	{
+		key := []byte{byte(rawdb.IX_DIDVerifiableCredentials)}
+		rawdb.ReadAllDID(s.b.ChainDb().(ethdb.KeyValueStore),key)
+	}
 	if !ok {
 		return nil, http.NewError(int(service.InvalidParams), "did is null")
 	}
+
+	filterKey, _ := param["filterKey"].(string)
+
+	filterValue, _ := param["filterValue"].(string)
+
 
 	idWithPrefix := idParam
 	if !rawdb.IsURIHasPrefix(idWithPrefix) {
@@ -325,7 +334,7 @@ func (s *PublicTransactionPoolAPI) ListCredentials(ctx context.Context, param ma
 		limit = 256
 	}
 	txsData, _ := rawdb.GetAllDIDVerifCredentials(s.b.ChainDb().(ethdb.KeyValueStore), buf.Bytes(), int64(skip),
-		int64(limit))
+		int64(limit), filterKey, filterValue, s.b.ChainConfig())
 	return txsData, nil
 }
 

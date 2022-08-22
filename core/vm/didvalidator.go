@@ -2410,6 +2410,8 @@ func checkIDVerifiableCredential(evm *EVM, signer string,
 	fmt.Println("credPayload.GetData():", string(credPayload.GetData()))
 	fmt.Println("publicKeyBase58:", publicKeyBase58)
 	fmt.Println("Signature:", credPayload.Proof.Signature)
+	fmt.Println("success:", success)
+
 	if err != nil {
 		log.Error("checkIDVerifiableCredential payload VerifyByVM failed", "err", err)
 		return err

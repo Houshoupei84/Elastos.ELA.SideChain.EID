@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 	"time"
 
@@ -1390,8 +1391,26 @@ func rollbackDIDVerifCredentials(db ethdb.KeyValueStore, idKey []byte) error {
 	}
 	return db.Put(key, buf.Bytes())
 }
+
+// ReadAllHashes retrieves all the hashes assigned to blocks at a certain heights,
+// both canonical and reorged forks included.
+func ReadAllDID(db ethdb.Iteratee, prefix []byte) []string {
+	dids := make([]string, 0, 1)
+	it := db.NewIteratorWithPrefix(prefix)
+	defer it.Release()
+
+	for it.Next() {
+		if key := it.Key(); len(key) == len(prefix)+46 {
+			dids = append(dids, string(key[len(key)-46:]))
+		}
+	}
+	return dids
+}
+
 //IX_DIDVerifiableCredentials
-func GetAllDIDVerifCredentials(db ethdb.KeyValueStore, idKey []byte,skip,limit int64) (*did.ListDIDVerifCreentials, error) {
+//IX_DIDVerifiableCredentials
+func GetAllDIDVerifCredentials(db ethdb.KeyValueStore, idKey []byte,skip,limit int64, filterKey, filterValue string,
+	config *params.ChainConfig) (*did.ListDIDVerifCreentials, error) {
 	key := []byte{byte(IX_DIDVerifiableCredentials)}
 	key = append(key, idKey...)
 
@@ -1432,7 +1451,44 @@ func GetAllDIDVerifCredentials(db ethdb.KeyValueStore, idKey []byte,skip,limit i
 		if err != nil {
 			return nil, err
 		}
-		credentials.Credentials = append(credentials.Credentials, credID)
+		if filterKey != "" {
+			buf := new(bytes.Buffer)
+			buf.WriteString(credID)
+			lastTXData, err := GetLastVerifiableCredentialTxData(db,buf.Bytes(), config)
+			if err != nil {
+				return nil,err
+			}
+			if lastTXData == nil {
+				return nil,errors.New("GetAllDIDVerifCredentials lastTXData == nil ")
+			}
+			verifCredData := lastTXData.Operation.CredentialDoc.VerifiableCredentialData
+
+			//var verifCredData did.VerifiableCredentialData
+			typeOfVerifCredData := reflect.TypeOf(*verifCredData)
+			valueOfVerifCredData := reflect.ValueOf(*verifCredData)
+
+			for i := 0; i < typeOfVerifCredData.NumField(); i++ {
+				field := typeOfVerifCredData.Field(i)
+				//if find filterKey
+				if  field.Name == filterKey {
+					//type is  []string
+					if filterKey == "Type" {
+						for _ , v := range verifCredData.Type{
+							if v == filterValue {
+								credentials.Credentials = append(credentials.Credentials, credID)
+							}
+						}
+					}else{
+						srcValue := valueOfVerifCredData.Field(i)
+						if srcValue.String() == filterValue {
+							credentials.Credentials = append(credentials.Credentials, credID)
+						}
+					}
+				}
+			}
+		}else {
+			credentials.Credentials = append(credentials.Credentials, credID)
+		}
 	}
 	return &credentials, nil
 }

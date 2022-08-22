@@ -7,7 +7,6 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/elastos/Elastos.ELA.SideChain/service"
 	"github.com/elastos/Elastos.ELA.SideChain.EID/common"
 	"github.com/elastos/Elastos.ELA.SideChain.EID/core/rawdb"
 	"github.com/elastos/Elastos.ELA.SideChain.EID/core/state"
@@ -15,6 +14,7 @@ import (
 	"github.com/elastos/Elastos.ELA.SideChain.EID/core/vm/did"
 	"github.com/elastos/Elastos.ELA.SideChain.EID/ethdb"
 	"github.com/elastos/Elastos.ELA.SideChain.EID/params"
+	"github.com/elastos/Elastos.ELA.SideChain/service"
 	elacom "github.com/elastos/Elastos.ELA/common"
 
 	"github.com/stretchr/testify/assert"
@@ -35,7 +35,7 @@ func TestReverse(t *testing.T){
 	fmt.Println("hashReverse", hashReverse)
 }
 
-func  TestChangUser2DocAndSaveToJsonJianBin2(t *testing.T) {
+func  TestCreateDID(t *testing.T) {
 
 	//s.validator.didParam.CustomIDFeeRate = 0
 	//privateKeyUser1Str := "FPHbdqtMZ6j4isEgbn54eKUjFSd84ffbBk7GMadDhiJF"
@@ -185,7 +185,6 @@ func  TestChangUser2DocAndSaveToJsonJianBin2_Deactive(t *testing.T) {
 
 //todo
 func  TestChangUser2DocAndSaveToJsonJianBin_VerifiableCredential_Declare(t *testing.T) {
-	return
 	privateKeyUser1Str := gentor.TestFromHexStrPrivateToBase58PriJianBin("1d5cf8daa96de73b81700b97f3809fe68e254b182d7fbcd64000a8796bb27a7f")
 	publicKeyUser1Str := gentor.TestFromHexStrPublicToBase58PublicJianBin("03dd9576e700601b05a2561f2781d746ce93ddcad05df2fbea06fcccfb69eec585")
 	privateKeyUser2Str2 := gentor.TestFromHexStrPrivateToBase58PriJianBin("dc8d5cdd829ede8086bb845d72cefc50ea76a19ef2107819290846fd8d18140f")
@@ -198,15 +197,22 @@ func  TestChangUser2DocAndSaveToJsonJianBin_VerifiableCredential_Declare(t *test
 	docPublicKeyUserArray := []string{
 		publicKeyUser2Str2, publicKeyUser2Str3,
 	}
-	idUser2 := "did:elastos:Lindalittlefish23"
+	idUser2 := "did:elastos:iYm2nAMXetnhtQYzF4nAa8dDKhfnxYqNDQ"
+	////todo
+	//veriCrePrivateKeys := []string{
+	//	"FPHbdqtMZ6j4isEgbn54eKUjFSd84ffbBk7GMadDhiJF", "BreRiS8SegmJ9pRaxPrLEZvrtiqtdAg7ghqyDQyQ3tun",
+	//}
+	//veriCrePublicKeys := []string{
+	//	"2Akc64WFqfbciM9TxpanipMG5eGmDafdMUohmNpqQZaWm", "yem32dZq2TVmjLLDe7y6Svj3Ag7qQtjUQ6P7nGdE6eTc",
+	//}
 	veriCrePrivateKeys := "FPHbdqtMZ6j4isEgbn54eKUjFSd84ffbBk7GMadDhiJF"
 
 	veriCrePublicKeys := "2Akc64WFqfbciM9TxpanipMG5eGmDafdMUohmNpqQZaWm"
 	//getPayloadDIDInfoChangeDoc_customterDID_verifiableCredential
-	txMyChangDOC := gentor.getPayloadDIDInfoChangeDoc_customterDID_verifiableCredential(idUser2, "declare", jianbinCtrl5PubKeyTest,
+	txMyChangDOC := gentor.getPayloadDIDInfoChangeDoc_customterDID_verifiableCredential(idUser2, "declare", verCreHandMadeDocByte,
 		privateKeyUser1Str, publicKeyUser1Str, docPrivateKeyUserArray, docPublicKeyUserArray,
-		"#key3", veriCrePrivateKeys, veriCrePublicKeys)
-	outputPayloadToFile(txMyChangDOC, "user2.dest.payload.json")
+		"#key2", veriCrePrivateKeys, veriCrePublicKeys)
+	outputPayloadToFile(txMyChangDOC, "declare_credential.json")
 }
 func  TestChangUser2DocAndSaveToJsonJianBin_VerifiableCredential_Revoke(t *testing.T) {
 	return

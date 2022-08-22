@@ -48,6 +48,121 @@ func (p *VerifiableCredentialDoc) CompleteCompact(did string) {
 	}
 }
 
+
+func (p *VerifiableCredentialDoc) GetData() []byte {
+	buf := NewNFCBuffer()
+	err := MarshalVerifiableCredentialDoc(p, buf)
+	if err != nil {
+		return nil
+	}
+	return buf.Bytes()
+}
+
+func MarshalVerifiableCredentialDoc(p *VerifiableCredentialDoc, buf *NFCBuffer) error {
+	buf.WriteString("{")
+	//context
+	contextCount := len(p.Context)
+	if contextCount != 0 {
+		err := buf.WriteKey("@context")
+		if err != nil {
+			return err
+		}
+		pks, err := JSONMarshal(p.Context)
+		if err != nil {
+			return err
+		}
+		buf.Write(pks)
+		buf.WriteString(",")
+	}
+	// ID
+	err := buf.WriteKey("id")
+	if err != nil {
+		return err
+	}
+	idv, err := JSONMarshal(p.ID)
+	if err != nil {
+		return err
+	}
+	buf.Write(idv)
+	buf.WriteString(",")
+
+	// Type
+	count := len(p.Type)
+	if count != 0 {
+		err := buf.WriteKey("type")
+		if err != nil {
+			return err
+		}
+		tpe, err := JSONMarshal(p.Type)
+		if err != nil {
+			return err
+		}
+		buf.Write(tpe)
+		buf.WriteString(",")
+	}
+
+	// Issuer
+	if err = buf.WriteKey("issuer"); err != nil {
+		return err
+	}
+	ise, err := JSONMarshal(p.Issuer)
+	if err != nil {
+		return err
+	}
+	buf.Write(ise)
+	buf.WriteString(",")
+
+	// IssuanceDate
+	err = buf.WriteKey("issuanceDate")
+	if err != nil {
+		return err
+	}
+	isd, err := JSONMarshal(p.IssuanceDate)
+	if err != nil {
+		return err
+	}
+	buf.Write(isd)
+	buf.WriteString(",")
+
+	// ExpirationDate
+	if p.ExpirationDate != "" {
+		err = buf.WriteKey("expirationDate")
+		if err != nil {
+			return err
+		}
+		exp, err := JSONMarshal(p.ExpirationDate)
+		if err != nil {
+			return err
+		}
+		buf.Write(exp)
+		buf.WriteString(",")
+	}
+	// CredentialSubject
+	err = buf.WriteKey("credentialSubject")
+	if err != nil {
+		return err
+	}
+	err = MarshalCredentialSubject(p.CredentialSubject, buf)
+	if err != nil {
+		return err
+	}
+	buf.WriteString(",")
+
+	// proof
+	err = buf.WriteKey("proof")
+	if err != nil {
+		return err
+	}
+	pf, err := JSONMarshal(p.Proof)
+	if err != nil {
+		return err
+	}
+	buf.Write(pf)
+
+	buf.WriteString("}")
+	return nil
+}
+
 type VerifiableCredential struct {
 	*VerifiableCredentialData
 	Proof CredentialProof `json:"proof,omitempty"`
